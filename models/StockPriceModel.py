@@ -7,7 +7,8 @@ from sklearn import svm
 
 import joblib
 
-from StockML.utils.DataFrameUtils import DataFrameUtils
+from StockML.utils.DataFrameUtils import define_result_wanted, convert_data_to_week_day
+from StockML.utils.Utils import relative_path
 
 
 class StockPriceModel:
@@ -38,9 +39,10 @@ class StockPriceModel:
     @staticmethod
     def prepare_df(df, prediction_column_name = None):
         if prediction_column_name:
-            df = DataFrameUtils.define_result_wanted(df, prediction_column_name)
+            df = define_result_wanted(df, prediction_column_name)
 
-        df = DataFrameUtils.date_column_to_epoch(df, 'date')
+        convert_data_to_week_day(df, 'date')
+
         df = StockPriceModel.map_company_names(df)
         return df
 
@@ -69,7 +71,6 @@ class StockPriceModel:
             print(self.stock_df.head())
         else:
             print("dataframe passed through is either invalid or prediction column name is invalid")
-
 
     def train(self, algorithm):
         X = self.stock_df[self.stock_df.columns[:-1]] 
@@ -105,4 +106,4 @@ class StockPriceModel:
 
         if best_classifier:
             print(f"{classifier} performed the best with an accuracy of: {best_accuracy}")
-            joblib.dump(classifier, f'.\\models\\files\\predict_{self.prediction_column_name}.pkl')
+            joblib.dump(classifier, relative_path(f'models/files/predict_{self.prediction_column_name}.pkl'))
